@@ -1,0 +1,5 @@
+{
+  "name": "NooKo Beugué",
+  "description": "Site web moderne et professionnel pour le restaurant NooKo Beugué. Présentation, menu, réservation et administration.",
+  "requestFramePermissions": ["geolocation"]
+}

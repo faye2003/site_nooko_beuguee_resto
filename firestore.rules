@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: reservations
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - phone: string (required)
+    //   - email: string (optional)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - time: string (required)
+    //   - guests: number (required)
+    //   - message: string (optional)
+    //   - status: string (required, enum: pending, confirmed, cancelled)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: menuItems
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - description: string (optional)
+    //   - price: number (required)
+    //   - photo: string (optional)
+    //   - category: string (required, enum: Entrées, Plats principaux, Grillades, Boissons, Desserts)
+    //   - isAvailable: bool (required)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: galleryImages
+    // Document ID: auto-generated
+    // Fields:
+    //   - url: string (required)
+    //   - title: string (optional)
+    //   - category: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: messages
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - email: string (required)
+    //   - phone: string (optional)
+    //   - message: string (required)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: restaurantInfo
+    // Document ID: static (e.g., 'main')
+    // Fields:
+    //   - address: string (required)
+    //   - phone: string (required)
+    //   - whatsapp: string (optional)
+    //   - email: string (required)
+    //   - hours: map (optional)
+    //   - description: string (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        (request.auth.token.email == "fayem7409@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDate(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}$");
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Reservations
+    match /reservations/{reservationId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.keys().hasAll(['name', 'phone', 'date', 'time', 'guests', 'status', 'createdAt']) &&
+                    request.resource.data.name is string && request.resource.data.name.size() < 100 &&
+                    request.resource.data.phone is string && request.resource.data.phone.size() < 30 &&
+                    isValidDate(request.resource.data.date) &&
+                    request.resource.data.guests is number && request.resource.data.guests > 0 &&
+                    request.resource.data.status == 'pending' &&
+                    request.resource.data.createdAt == request.time;
+      allow update, delete: if isAdmin();
+    }
+
+    // Menu Items
+    match /menuItems/{menuItemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Gallery Images
+    match /galleryImages/{imageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Messages
+    match /messages/{messageId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message', 'createdAt']) &&
+                    request.resource.data.name is string && request.resource.data.name.size() < 100 &&
+                    isValidEmail(request.resource.data.email) &&
+                    request.resource.data.message is string && request.resource.data.message.size() < 2000 &&
+                    request.resource.data.createdAt == request.time;
+      allow update, delete: if isAdmin();
+    }
+
+    // Restaurant Info
+    match /restaurantInfo/{infoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Users (for roles)
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+  }
+}

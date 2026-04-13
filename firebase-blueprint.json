@@ -1,0 +1,97 @@
+{
+  "entities": {
+    "reservations": {
+      "title": "Réservations",
+      "description": "Réservations de tables au restaurant.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nom du client" },
+        "phone": { "type": "string", "description": "Téléphone du client" },
+        "email": { "type": "string", "format": "email", "description": "Email du client" },
+        "date": { "type": "string", "format": "date", "description": "Date de réservation" },
+        "time": { "type": "string", "description": "Heure de réservation" },
+        "guests": { "type": "number", "description": "Nombre de personnes" },
+        "message": { "type": "string", "description": "Message optionnel" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"], "description": "Statut de la réservation" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Date de création" }
+      },
+      "required": ["name", "phone", "date", "time", "guests", "status", "createdAt"]
+    },
+    "menuItems": {
+      "title": "Menu",
+      "description": "Plats proposés au menu.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nom du plat" },
+        "description": { "type": "string", "description": "Description du plat" },
+        "price": { "type": "number", "description": "Prix du plat" },
+        "photo": { "type": "string", "description": "URL de la photo" },
+        "category": { "type": "string", "enum": ["Entrées", "Plats principaux", "Grillades", "Boissons", "Desserts"], "description": "Catégorie du plat" },
+        "isAvailable": { "type": "boolean", "description": "Disponibilité du plat" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Date de création" }
+      },
+      "required": ["name", "price", "category", "isAvailable", "createdAt"]
+    },
+    "galleryImages": {
+      "title": "Galerie",
+      "description": "Photos du restaurant et des plats.",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string", "description": "URL de l'image" },
+        "title": { "type": "string", "description": "Titre de l'image" },
+        "category": { "type": "string", "description": "Catégorie de l'image" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Date de création" }
+      },
+      "required": ["url", "createdAt"]
+    },
+    "messages": {
+      "title": "Messages",
+      "description": "Messages envoyés via le formulaire de contact.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nom de l'expéditeur" },
+        "email": { "type": "string", "format": "email", "description": "Email de l'expéditeur" },
+        "phone": { "type": "string", "description": "Téléphone de l'expéditeur" },
+        "message": { "type": "string", "description": "Contenu du message" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Date d'envoi" }
+      },
+      "required": ["name", "email", "message", "createdAt"]
+    },
+    "restaurantInfo": {
+      "title": "Informations Restaurant",
+      "description": "Informations générales sur le restaurant.",
+      "type": "object",
+      "properties": {
+        "address": { "type": "string", "description": "Adresse physique" },
+        "phone": { "type": "string", "description": "Téléphone de contact" },
+        "whatsapp": { "type": "string", "description": "Numéro WhatsApp" },
+        "email": { "type": "string", "format": "email", "description": "Email de contact" },
+        "hours": { "type": "object", "description": "Horaires d'ouverture" },
+        "description": { "type": "string", "description": "Description du restaurant" }
+      },
+      "required": ["address", "phone", "email"]
+    }
+  },
+  "firestore": {
+    "/reservations/{reservationId}": {
+      "schema": "reservations",
+      "description": "Collection des réservations."
+    },
+    "/menuItems/{menuItemId}": {
+      "schema": "menuItems",
+      "description": "Collection des plats du menu."
+    },
+    "/galleryImages/{imageId}": {
+      "schema": "galleryImages",
+      "description": "Collection des images de la galerie."
+    },
+    "/messages/{messageId}": {
+      "schema": "messages",
+      "description": "Collection des messages de contact."
+    },
+    "/restaurantInfo/{infoId}": {
+      "schema": "restaurantInfo",
+      "description": "Informations du restaurant."
+    }
+  }
+}
